@@ -8,6 +8,10 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using VHSKCD.Models;
 using VHSKCD.Extension;
+using VHSKCD.Repository.Impl;
+using VHSKCD.Repository;
+using VHSKCD.Services.Impl;
+using VHSKCD.Services;
 
 namespace VHSKCD
 {
@@ -48,6 +52,11 @@ namespace VHSKCD
                            .SetIsOriginAllowed((host) => true));
             });
             builder.Services.AddScoped<MailService>();
+
+            // Repository
+            builder.Services.AddScoped<IBannerRepository, BannerRepository>();
+            // Service
+            builder.Services.AddScoped<IBannerService, BannerService>();
 
             builder.Configuration
     .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
