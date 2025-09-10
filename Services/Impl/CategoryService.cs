@@ -1,6 +1,7 @@
-﻿using VHSKCD.DTOs;
+﻿using VHSKCD.DTOs.Categories;
 using VHSKCD.Models;
-using VHSKCD.Services.Interface;
+using VHSKCD.Repository;
+using VHSKCD.Repository.Impl;
 
 namespace VHSKCD.Services.Impl
 {
@@ -13,37 +14,68 @@ namespace VHSKCD.Services.Impl
         }
 
         public async Task<IEnumerable<Category>> GetAllAsync()
-            => await _repo.GetAllAsync();
-
-        public async Task<Category?> GetByIdAsync(int id)
-            => await _repo.GetByIdAsync(id);
-
-        public async Task<CategoriesDTO> CreateAsync(CategoriesDTO category)
         {
-            category.CreatedAt = DateTime.Now;
-            await _repo.AddAsync(category);
-            return category;
+            var categories = await _repo.GetAllAsync();
+            return categories.Select(c => new Category
+            {
+                Id = c.Id,
+                Name = c.Name,
+                ParentId = c.ParentId,
+                CreatedAt = (DateTime)c.CreatedAt,
+                
+            });
         }
 
-        public async Task<Category?> UpdateAsync(int id, Category category)
+        public async Task<Category> GetByIdAsync(int id)
         {
-            var existing = await _repo.GetByIdAsync(id);
-            if (existing == null) return null;
+            var c = await _repo.GetByIdAsync(id);
+            if (c == null) return null;
 
-            existing.Name = category.Name;
-            existing.ParentId = category.ParentId;
-            existing.CreatedAt = existing.CreatedAt; // giữ nguyên ngày tạo
-
-            await _repo.UpdateAsync(existing);
-            return existing;
+            return new Category
+            {
+                Id = c.Id,
+                Name = c.Name,
+                ParentId = c.ParentId,
+                CreatedAt = (DateTime)c.CreatedAt
+            };
         }
 
-        public async Task<bool> DeleteAsync(int id)
+
+        public async Task<Category> AddAsync(AddCategory dto)
         {
-            var existing = await _repo.GetByIdAsync(id);
-            if (existing == null) return false;
-            await _repo.DeleteAsync(id);
-            return true;
+            var entity = new Category
+            {
+                Name = dto.Name,
+                ParentId = dto.ParentId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+
+            await _repo.AddAsync(entity);
+
+            return entity;
+        }
+
+        public async Task<Category?> EditAsync(int id, UpdateCategory dto)
+        {
+
+            var entity = await _repo.GetByIdAsync(id);
+            if (entity == null)
+                throw new Exception("Category not found.");
+
+
+            entity.Name = dto.Name;
+            entity.ParentId = dto.ParentId;
+
+            await _repo.UpdateAsync(entity);
+
+            return new Category
+            {
+                //Id = entity.Id,
+                Name = entity.Name,
+                ParentId = entity.ParentId,
+                CreatedAt = (DateTime)entity.CreatedAt
+            };
         }
     }
 }

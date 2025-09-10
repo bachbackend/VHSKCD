@@ -55,8 +55,12 @@ namespace VHSKCD
 
             // Repository
             builder.Services.AddScoped<IBannerRepository, BannerRepository>();
+            //builder.Services.AddScoped<IArticleRepository , ArticleRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             // Service
             builder.Services.AddScoped<IBannerService, BannerService>();
+            //builder.Services.AddScoped<IArticleService , ArticleService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             builder.Configuration
     .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);

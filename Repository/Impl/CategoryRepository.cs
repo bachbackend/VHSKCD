@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VHSKCD.DTOs;
+using VHSKCD.DTOs.Categories;
 using VHSKCD.Models;
 
-namespace VHSKCD.Services.Interface
+namespace VHSKCD.Repository.Impl
 {
     public class CategoryRepository : ICategoryRepository
     {
@@ -13,20 +13,18 @@ namespace VHSKCD.Services.Interface
         }
 
         public async Task<IEnumerable<Category>> GetAllAsync()
-            => await _context.Categories.ToListAsync();
+        {
+            return await _context.Categories.ToListAsync();
+        }
 
         public async Task<Category?> GetByIdAsync(int id)
-            => await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
-
-        public async Task AddAsync(CategoriesDTO category)
         {
-            var newCate = new Category
-            {
-                Name = category.Name,
-                CreatedAt = DateTime.Now,
-                ParentId = category.ParentId,
-            };
-            await _context.Categories.AddAsync(newCate);
+            return await _context.Categories.FindAsync(id);
+        }
+
+        public async Task AddAsync(Category category)
+        {
+            await _context.Categories.AddAsync(category);
             await _context.SaveChangesAsync();
         }
 
@@ -36,14 +34,14 @@ namespace VHSKCD.Services.Interface
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var category = await _context.Categories.FindAsync(id);
-            if (category != null)
-            {
-                _context.Categories.Remove(category);
-                await _context.SaveChangesAsync();
-            }
+            if (category == null) return false;
+
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

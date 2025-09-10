@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VHSKCD.DTOs;
+using VHSKCD.DTOs.Categories;
 using VHSKCD.Models;
+using VHSKCD.Services;
 using VHSKCD.Services.Impl;
 
 namespace VHSKCD.Controllers
@@ -17,7 +18,10 @@ namespace VHSKCD.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
-            => Ok(await _service.GetAllAsync());
+        {
+            var categories = await _service.GetAllAsync();
+            return Ok(categories);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -28,26 +32,27 @@ namespace VHSKCD.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CategoriesDTO category)
+        public async Task<IActionResult> Create([FromBody] AddCategory dto)
         {
-            var created = await _service.CreateAsync(category);
-            return CreatedAtAction(nameof(GetById), new { name = category.Name}, created);
+            var category = await _service.AddAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Category category)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategory dto)
         {
-            var updated = await _service.UpdateAsync(id, category);
-            if (updated == null) return NotFound();
-            return Ok(updated);
+            try
+            {
+                var category = await _service.EditAsync(id, dto);
+                return Ok(category);
+
+            } catch (Exception ex)
+            {
+                return NotFound();
+            }
+
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted) return NotFound();
-            return NoContent();
-        }
+
     }
 }

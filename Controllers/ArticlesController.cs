@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using VHSKCD.DTOs.Articles;
 using VHSKCD.Models;
 using VHSKCD.Services.Impl;
 
@@ -8,15 +9,18 @@ namespace VHSKCD.Controllers
     [Route("api/[controller]")]
     public class ArticlesController : ControllerBase
     {
-        private readonly IArticleService _service;
-        public ArticlesController(IArticleService service)
+        private readonly ArticleService _service;
+        public ArticlesController(ArticleService service)
         {
             _service = service;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
-            => Ok(await _service.GetAllAsync());
+        {
+            var articles = await _service.GetAllAsync();
+            return Ok(articles);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -27,25 +31,28 @@ namespace VHSKCD.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Article article)
+        public async Task<IActionResult> Create([FromBody] AddArticle dto)
         {
-            var created = await _service.CreateAsync(article);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            var article = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = article.Id }, article);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Article article)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateArticle dto)
         {
-            var updated = await _service.UpdateAsync(id, article);
-            if (updated == null) return NotFound();
-            return Ok(updated);
+            if (id != dto.Id) return BadRequest();
+
+            var article = await _service.UpdateAsync(dto);
+            if (article == null) return NotFound();
+
+            return Ok(article);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted) return NotFound();
+            var result = await _service.DeleteAsync(id);
+            if (!result) return NotFound();
             return NoContent();
         }
     }
