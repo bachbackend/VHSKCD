@@ -20,6 +20,7 @@ namespace VHSKCD.Services.Impl
                 Id = a.Id,
                 CategoryId = a.CategoryId,
                 Title = a.Title,
+                Content = a.Content,
                 Thumbnail = a.Thumbnail,
                 Status = a.Status,
                 CreatedAt = (DateTime)a.CreatedAt,
@@ -38,6 +39,7 @@ namespace VHSKCD.Services.Impl
                 Id = a.Id,
                 CategoryId = a.CategoryId,
                 Title = a.Title,
+                Content= a.Content,
                 Thumbnail = a.Thumbnail,
                 Status = a.Status,
                 CreatedAt = a.CreatedAt,
@@ -52,6 +54,7 @@ namespace VHSKCD.Services.Impl
             {
                 CategoryId = dto.CategoryId,
                 Title = dto.Title,
+                Content = dto.Content,
                 Thumbnail = dto.Thumbnail,
                 Status = dto.Status,
                 CreatedAt = DateTime.UtcNow,
@@ -65,6 +68,7 @@ namespace VHSKCD.Services.Impl
                 Id = entity.Id,
                 CategoryId = entity.CategoryId,
                 Title = entity.Title,
+                Content = entity.Content,
                 Thumbnail = entity.Thumbnail,
                 Status = entity.Status,
                 CreatedAt = entity.CreatedAt,
@@ -79,6 +83,7 @@ namespace VHSKCD.Services.Impl
 
             entity.CategoryId = dto.CategoryId;
             entity.Title = dto.Title;
+            entity.Content = dto.Content;
             entity.Thumbnail = dto.Thumbnail;
             entity.Status = dto.Status;
             entity.UserId = dto.UserId;
@@ -91,6 +96,7 @@ namespace VHSKCD.Services.Impl
                 Id = entity.Id,
                 CategoryId = entity.CategoryId,
                 Title = entity.Title,
+                Content = entity.Content,
                 Thumbnail = entity.Thumbnail,
                 Status = entity.Status,
                 CreatedAt = entity.CreatedAt,

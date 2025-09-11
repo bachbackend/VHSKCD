@@ -26,7 +26,7 @@ public partial class B4zgrbg0p5agywu5uoneContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=b4zgrbg0p5agywu5uone-mysql.services.clever-cloud.com;database=b4zgrbg0p5agywu5uone;uid=uvrnnkzbvqxwbbtl;pwd=DH4qJTx1faatXeQqsH7n", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.22-mysql"));
+        => optionsBuilder.UseMySql("server=b4zgrbg0p5agywu5uone-mysql.services.clever-cloud.com;uid=uvrnnkzbvqxwbbtl;pwd=DH4qJTx1faatXeQqsH7n;database=b4zgrbg0p5agywu5uone", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.22-mysql"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,6 +46,7 @@ public partial class B4zgrbg0p5agywu5uoneContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")

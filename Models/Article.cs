@@ -21,6 +21,8 @@ public partial class Article
 
     public DateTime? UpdateAt { get; set; }
 
+    public string Content { get; set; } = null!;
+
     public virtual Category? Category { get; set; }
 
     public virtual User? User { get; set; }
