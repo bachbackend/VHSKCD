@@ -55,12 +55,12 @@ namespace VHSKCD
 
             // Repository
             builder.Services.AddScoped<IBannerRepository, BannerRepository>();
-            //builder.Services.AddScoped<IArticleRepository , ArticleRepository>();
+            builder.Services.AddScoped<IArticleRepository , ArticleRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             // Service
             builder.Services.AddScoped<IBannerService, BannerService>();
-            //builder.Services.AddScoped<IArticleService , ArticleService>();
+            builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IUserService, UserService>();
 

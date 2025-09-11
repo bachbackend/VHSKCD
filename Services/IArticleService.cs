@@ -7,7 +7,7 @@ namespace VHSKCD.Services
     {
         Task<IEnumerable<Article>> GetAllAsync();
         Task<Article?> GetByIdAsync(int id);
-        Task<Article> AddAsync(AddArticle dto);
-        Task<Article?> EditAsync(int id, UpdateArticle dto);
+        Task<Article> AddAsync(IFormFile file, AddArticle dto);
+        Task<Article?> EditAsync(IFormFile file, int id, UpdateArticle dto);
     }
 }

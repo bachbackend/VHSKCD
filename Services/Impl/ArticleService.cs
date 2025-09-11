@@ -1,113 +1,94 @@
 ﻿using VHSKCD.DTOs.Articles;
 using VHSKCD.Models;
+using VHSKCD.Repository;
 using VHSKCD.Repository.Impl;
 
 namespace VHSKCD.Services.Impl
 {
-    public class ArticleService
+    public class ArticleService : IArticleService
     {
-        private readonly ArticleRepository _repo;
-        public ArticleService(ArticleRepository repo)
+        private readonly IArticleRepository _repo;
+        public ArticleService(IArticleRepository repo)
         {
             _repo = repo;
         }
 
-        public async Task<IEnumerable<ArticlesDTO>> GetAllAsync()
+        public async Task<Article> AddAsync(IFormFile file, AddArticle dto)
         {
-            var articles = await _repo.GetAllAsync();
-            return articles.Select(a => new ArticlesDTO
-            {
-                Id = a.Id,
-                CategoryId = a.CategoryId,
-                Title = a.Title,
-                Content = a.Content,
-                Thumbnail = a.Thumbnail,
-                Status = a.Status,
-                CreatedAt = (DateTime)a.CreatedAt,
-                UserId = a.UserId,
-                UpdateAt = a.UpdateAt
-            });
-        }
+            if (file == null || file.Length == 0)
+                throw new Exception("No image uploaded.");
 
-        public async Task<ArticlesDTO> GetByIdAsync(int id)
-        {
-            var a = await _repo.GetByIdAsync(id);
-            if (a == null) return null;
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (!allowedExtensions.Contains(extension))
+                throw new Exception("Invalid file type.");
 
-            return new ArticlesDTO
-            {
-                Id = a.Id,
-                CategoryId = a.CategoryId,
-                Title = a.Title,
-                Content= a.Content,
-                Thumbnail = a.Thumbnail,
-                Status = a.Status,
-                CreatedAt = a.CreatedAt,
-                UserId = a.UserId,
-                UpdateAt = a.UpdateAt
-            };
-        }
+            // Save file
+            var fileName = Guid.NewGuid() + extension;
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/article", fileName);
 
-        public async Task<ArticlesDTO> CreateAsync(AddArticle dto)
-        {
-            var entity = new Article
+            using (var stream = new FileStream(path, FileMode.Create))
             {
-                CategoryId = dto.CategoryId,
+                await file.CopyToAsync(stream);
+            }
+            var art = new Article
+            {
                 Title = dto.Title,
                 Content = dto.Content,
-                Thumbnail = dto.Thumbnail,
+                Thumbnail = fileName,
                 Status = dto.Status,
-                CreatedAt = DateTime.UtcNow,
-                UserId = dto.UserId
+                CreatedAt = DateTime.Now
             };
+            await _repo.AddAsync(art);
+            return art;
 
-            await _repo.AddAsync(entity);
-
-            return new ArticlesDTO
-            {
-                Id = entity.Id,
-                CategoryId = entity.CategoryId,
-                Title = entity.Title,
-                Content = entity.Content,
-                Thumbnail = entity.Thumbnail,
-                Status = entity.Status,
-                CreatedAt = entity.CreatedAt,
-                UserId = entity.UserId
-            };
         }
 
-        public async Task<ArticlesDTO> UpdateAsync(UpdateArticle dto)
+        public async Task<Article?> EditAsync(IFormFile file, int id, UpdateArticle dto)
         {
-            var entity = await _repo.GetByIdAsync(dto.Id);
-            if (entity == null) return null;
+            var article = await _repo.GetByIdAsync(id);
+            if (article == null)
+                throw new Exception("Article not found.");
 
-            entity.CategoryId = dto.CategoryId;
-            entity.Title = dto.Title;
-            entity.Content = dto.Content;
-            entity.Thumbnail = dto.Thumbnail;
-            entity.Status = dto.Status;
-            entity.UserId = dto.UserId;
-            entity.UpdateAt = DateTime.UtcNow;
+            // update fields
+            article.Title = dto.Title;
+            article.Content = dto.Content;
+            //article.Thumbnail = dto.Thumbnail;
+            article.Status = dto.Status;
+            article.UpdateAt = DateTime.UtcNow;
 
-            await _repo.UpdateAsync(entity);
-
-            return new ArticlesDTO  
+            // handle file
+            if (file != null && file.Length > 0)
             {
-                Id = entity.Id,
-                CategoryId = entity.CategoryId,
-                Title = entity.Title,
-                Content = entity.Content,
-                Thumbnail = entity.Thumbnail,
-                Status = entity.Status,
-                CreatedAt = entity.CreatedAt,
-                UserId = entity.UserId,
-                UpdateAt = entity.UpdateAt
-            };
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                var extension = Path.GetExtension(file.FileName).ToLower();
+                if (!allowedExtensions.Contains(extension))
+                    throw new Exception("Invalid file type. Allowed types: .jpg, .jpeg, .png");
+
+                var fileName = Guid.NewGuid() + extension;
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/article", fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                article.Thumbnail = fileName;
+            }
+
+            await _repo.UpdateAsync(article);
+
+            return article;
+        }
+        public async Task<IEnumerable<Article>> GetAllAsync()
+        {
+            return await _repo.GetAllAsync();
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<Article?> GetByIdAsync(int id)
         {
-            return await _repo.DeleteAsync(id);
+            if (id == null) return null;
+            return await _repo.GetByIdAsync(id);
         }
     }
 }

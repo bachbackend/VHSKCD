@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using VHSKCD.DTOs.Articles;
 using VHSKCD.Models;
 
 namespace VHSKCD.Repository.Impl
@@ -12,7 +13,7 @@ namespace VHSKCD.Repository.Impl
         }
         public async Task<IEnumerable<Article>> GetAllAsync()
         {
-            return await _context.Articles.Include(a => a.Category).Include(a => a.User).ToListAsync();
+            return await _context.Articles.ToListAsync();
         }
 
         public async Task<Article> GetByIdAsync(int id)

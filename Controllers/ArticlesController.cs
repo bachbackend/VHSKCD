@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 using VHSKCD.DTOs.Articles;
 using VHSKCD.Models;
+using VHSKCD.Services;
 using VHSKCD.Services.Impl;
 
 namespace VHSKCD.Controllers
@@ -9,8 +11,8 @@ namespace VHSKCD.Controllers
     [Route("api/[controller]")]
     public class ArticlesController : ControllerBase
     {
-        private readonly ArticleService _service;
-        public ArticlesController(ArticleService service)
+        private readonly IArticleService _service;
+        public ArticlesController(IArticleService service)
         {
             _service = service;
         }
@@ -31,29 +33,30 @@ namespace VHSKCD.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AddArticle dto)
+        public async Task<IActionResult> Create(IFormFile file, [FromForm] AddArticle dto)
         {
-            var article = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = article.Id }, article);
+            var article = await _service.AddAsync(file,dto);
+            return Ok(new { articleId = article.Id, fileName = article.Thumbnail });
+            //return CreatedAtAction(nameof(GetById), new { id = article.Id }, article);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateArticle dto)
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateArticle dto, IFormFile? file)
         {
             if (id != dto.Id) return BadRequest();
 
-            var article = await _service.UpdateAsync(dto);
+            var article = await _service.EditAsync(file,id,dto);
             if (article == null) return NotFound();
 
             return Ok(article);
         }
 
-        [HttpDelete("{id}")]
+        /*[HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _service.DeleteAsync(id);
             if (!result) return NotFound();
             return NoContent();
-        }
+        }*/
     }
 }
