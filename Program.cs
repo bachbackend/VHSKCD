@@ -57,13 +57,15 @@ namespace VHSKCD
             builder.Services.AddScoped<IBannerRepository, BannerRepository>();
             //builder.Services.AddScoped<IArticleRepository , ArticleRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             // Service
             builder.Services.AddScoped<IBannerService, BannerService>();
             //builder.Services.AddScoped<IArticleService , ArticleService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Configuration
-    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
+            .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true);
 
             // Đăng ký DbContext với MySQL sử dụng Pomelo.EntityFrameworkCore.MySql
             builder.Services.AddDbContext<B4zgrbg0p5agywu5uoneContext>(options =>
