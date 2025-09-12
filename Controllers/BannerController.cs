@@ -28,10 +28,15 @@ namespace VHSKCD.Controllers
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetBannerById(int id)
         {
-            var banner = await _bannerService.GetByIdAsync(id);
-            if (banner == null)
-                return NotFound("Quảng cáo không tồn tại.");
-            return Ok(banner);
+            try
+            {
+                var banner = await _bannerService.GetByIdAsync(id);
+                return Ok(banner);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         [HttpPost("Add")]

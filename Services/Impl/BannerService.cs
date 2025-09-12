@@ -95,7 +95,12 @@ namespace VHSKCD.Services.Impl
 
         public async Task<Banner?> GetByIdAsync(int id)
         {
-            return await _repo.GetByIdAsync(id);
+            var banner = await _repo.GetByIdAsync(id);
+            if (banner == null)
+            {
+                throw new KeyNotFoundException($"Banner with id {id} not found.");
+            }
+            return banner;
         }
     }
 }
