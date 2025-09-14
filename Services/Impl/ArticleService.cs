@@ -1,4 +1,7 @@
-﻿using VHSKCD.DTOs.Articles;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using VHSKCD.DTOs.Articles;
+using VHSKCD.DTOs.Paging;
 using VHSKCD.Models;
 using VHSKCD.Repository;
 using VHSKCD.Repository.Impl;
@@ -80,15 +83,171 @@ namespace VHSKCD.Services.Impl
 
             return article;
         }
-        public async Task<IEnumerable<Article>> GetAllAsync()
+        //public async Task<IEnumerable<Article>> GetAllAsync()
+        //{
+        //    return await _repo.GetAllAsync();
+        //}
+
+        public async Task<(List<ArticleReturnDTO>, PagingReturn)> GetArticlesAsync(int pageNumber, int pageSize, int? status, string? title, int? categoryId, string? sortBy, string? sortOrder)
         {
-            return await _repo.GetAllAsync();
+            var articles = await _repo.GetAllAsync();
+
+            // Filter
+            if (!string.IsNullOrEmpty(title))
+                articles = articles.Where(p => p.Title.Contains(title));
+
+            if (categoryId.HasValue)
+                articles = articles.Where(p => p.CategoryId == categoryId.Value);
+
+            if (status.HasValue)
+                articles = articles.Where(p => p.Status == status.Value);
+
+            // Sort
+            sortBy = sortBy?.ToLower();
+            sortOrder = sortOrder?.ToLower() ?? "asc";
+
+            if (sortBy == "title")
+                articles = sortOrder == "desc" ? articles.OrderByDescending(p => p.Title) : articles.OrderBy(p => p.Title);
+            else if (sortBy == "createdate")
+                articles = sortOrder == "desc" ? articles.OrderByDescending(p => p.CreatedAt) : articles.OrderBy(p => p.CreatedAt);
+            else
+                articles = sortOrder == "desc" ? articles.OrderByDescending(p => p.Id) : articles.OrderBy(p => p.Id);
+
+            // Pagination
+            int totalArticleCount = await articles.CountAsync();
+            int totalPageCount = (int)Math.Ceiling(totalArticleCount / (double)pageSize);
+            int nextPage = pageNumber + 1 > totalPageCount ? pageNumber : pageNumber + 1;
+            int previousPage = pageNumber - 1 < 1 ? pageNumber : pageNumber - 1;
+
+            var pagingResult = new PagingReturn
+            {
+                TotalPageCount = totalPageCount,
+                CurrentPage = pageNumber,
+                NextPage = nextPage,
+                PreviousPage = previousPage
+            };
+
+            var articletWithPaging = await articles
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new ArticleReturnDTO
+                {
+                    Id = p.Id,
+                    Thumbnail = p.Thumbnail,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Status = p.Status,
+                    CreatedAt = p.CreatedAt,
+                    ArticleCateId = p.CategoryId,
+                    ArticleCateName = p.Category.Name,
+                })
+                .ToListAsync();
+
+            return (articletWithPaging, pagingResult);
+        }
+
+        public async Task<(List<ArticleReturnDTO>, PagingReturn)> GetArticlesStatusZeroAsync(int pageNumber, int pageSize, string? title, int? categoryId)
+        {
+            var articles = await _repo.GetAllAsync();
+
+            // Filter
+            if (!string.IsNullOrEmpty(title))
+                articles = articles.Where(p => p.Title.Contains(title));
+
+            if (categoryId.HasValue)
+                articles = articles.Where(p => p.CategoryId == categoryId.Value);
+
+            // Sắp xếp theo createdDate giảm dần
+            articles = articles.OrderByDescending(p => p.CreatedAt);
+
+            // Pagination
+            int totalArticleCount = await articles.CountAsync();
+            int totalPageCount = (int)Math.Ceiling(totalArticleCount / (double)pageSize);
+            int nextPage = pageNumber + 1 > totalPageCount ? pageNumber : pageNumber + 1;
+            int previousPage = pageNumber - 1 < 1 ? pageNumber : pageNumber - 1;
+
+            var pagingResult = new PagingReturn
+            {
+                TotalPageCount = totalPageCount,
+                CurrentPage = pageNumber,
+                NextPage = nextPage,
+                PreviousPage = previousPage
+            };
+
+            var articletWithPaging = await articles
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new ArticleReturnDTO
+                {
+                    Id = p.Id,
+                    Thumbnail = p.Thumbnail,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Status = p.Status,
+                    CreatedAt = p.CreatedAt,
+                    ArticleCateId = p.CategoryId,
+                    ArticleCateName = p.Category.Name,
+                })
+                .ToListAsync();
+
+            return (articletWithPaging, pagingResult);
+        }
+
+        public async Task<List<ArticleReturnDTO>> GetByCategoryIdAsync(int categoryId)
+        {
+            var articles = await _repo.GetByCategoryIdAsync(categoryId);
+
+            return articles.Select(p => new ArticleReturnDTO
+            {
+                Id = p.Id,
+                Thumbnail = p.Thumbnail,
+                Title = p.Title,
+                Content = p.Content,
+                Status = p.Status,
+                CreatedAt = p.CreatedAt,
+                ArticleCateId = p.CategoryId,
+                ArticleCateName = p.Category.Name
+            }).ToList();
         }
 
         public async Task<Article?> GetByIdAsync(int id)
         {
             if (id == null) return null;
             return await _repo.GetByIdAsync(id);
+        }
+
+        public async Task<List<ArticleReturnDTO>> GetLatestArticlesAsync(int count)
+        {
+            var articles = await _repo.GetLatestAsync(count);
+
+            return articles.Select(p => new ArticleReturnDTO
+            {
+                Id = p.Id,
+                ArticleCateId = p.CategoryId,
+                ArticleCateName = p.Category.Name,
+                Title = p.Title,
+                Content = p.Content,
+                Thumbnail = p.Thumbnail,
+                Status = p.Status,
+                CreatedAt = p.CreatedAt
+            }).ToList();
+        }
+
+        public async Task<List<ArticleReturnDTO>> GetRandomArticlesAsync(int count)
+        {
+            var articles = await _repo.GetRandomAsync(count);
+
+            return articles.Select(p => new ArticleReturnDTO
+            {
+                Id = p.Id,
+                ArticleCateId = p.CategoryId,
+                ArticleCateName = p.Category.Name,
+                Title = p.Title,
+                Content = p.Content,
+                Thumbnail = p.Thumbnail,
+                Status = p.Status,
+                CreatedAt = p.CreatedAt
+            }).ToList();
         }
     }
 }
