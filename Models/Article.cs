@@ -23,6 +23,8 @@ public partial class Article
 
     public string Content { get; set; } = null!;
 
+    public string? Description { get; set; }
+
     public virtual Category? Category { get; set; }
 
     public virtual User? User { get; set; }

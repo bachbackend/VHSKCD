@@ -51,6 +51,9 @@ public partial class B4zgrbg0p5agywu5uoneContext : DbContext
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("timestamp")
                 .HasColumnName("created_at");
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .HasColumnName("description");
             entity.Property(e => e.Status)
                 .HasDefaultValueSql("'1'")
                 .HasColumnName("status");

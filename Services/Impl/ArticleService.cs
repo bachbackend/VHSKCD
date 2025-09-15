@@ -37,6 +37,7 @@ namespace VHSKCD.Services.Impl
             var art = new Article
             {
                 Title = dto.Title,
+                Description = dto.Description,
                 Content = dto.Content,
                 Thumbnail = fileName,
                 Status = dto.Status,
