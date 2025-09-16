@@ -80,12 +80,9 @@ namespace VHSKCD.Repository.Impl
 
         public async Task<IQueryable<Article>> GetByCategoryIdAsync(int categoryId)
         {
-            return await Task.FromResult(
-                _context.Articles
+            return _context.Articles
                 .Include(p => p.Category)
-                .Where(p => p.CategoryId == categoryId)
-                .AsQueryable()
-            );
+                .Where(p => p.CategoryId == categoryId);
         }
 
         //public async Task<List<Article>> GetByCategoryIdAsync(int categoryId)

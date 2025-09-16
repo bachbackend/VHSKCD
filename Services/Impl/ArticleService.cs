@@ -36,6 +36,7 @@ namespace VHSKCD.Services.Impl
             }
             var art = new Article
             {
+                CategoryId = dto.CategoryId,
                 Title = dto.Title,
                 Description = dto.Description,
                 Content = dto.Content,

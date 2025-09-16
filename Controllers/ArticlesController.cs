@@ -112,7 +112,7 @@ namespace VHSKCD.Controllers
         }
 
         [HttpGet("GetArticleByCategoryId/{categoryId}")]
-        public async Task<IActionResult> GetArticleByCategoryId(int categoryId, int pageNumber, int? pageSize = null)
+        public async Task<IActionResult> GetArticleByCategoryId(int categoryId, int pageNumber = 1, int? pageSize = null)
         {
             int actualPageSize = pageSize ?? _paginationSettings.DefaultPageSize;
 
