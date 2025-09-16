@@ -11,6 +11,6 @@ namespace VHSKCD.Repository
         Task UpdateAsync(Article entity);
         Task<List<Article>> GetRandomAsync(int count);
         Task<List<Article>> GetLatestAsync(int count);
-        Task<List<Article>> GetByCategoryIdAsync(int categoryId);
+        Task<IQueryable<Article>> GetByCategoryIdAsync(int categoryId);
     }
 }

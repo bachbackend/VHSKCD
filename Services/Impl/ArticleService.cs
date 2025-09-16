@@ -194,22 +194,63 @@ namespace VHSKCD.Services.Impl
             return (articletWithPaging, pagingResult);
         }
 
-        public async Task<List<ArticleReturnDTO>> GetByCategoryIdAsync(int categoryId)
+        public async Task<(List<ArticleReturnDTO>, PagingReturn)> GetByCategoryIdAsync(int categoryId, int pageNumber, int pageSize)
         {
             var articles = await _repo.GetByCategoryIdAsync(categoryId);
 
-            return articles.Select(p => new ArticleReturnDTO
+            articles = articles.OrderByDescending(p => p.CreatedAt);
+
+            int totalArticleCount = await articles.CountAsync();
+            int totalPageCount = (int)Math.Ceiling(totalArticleCount / (double)pageSize);
+            int nextPage = pageNumber + 1 > totalPageCount ? pageNumber : pageNumber + 1;
+            int previousPage = pageNumber - 1 < 1 ? pageNumber : pageNumber - 1;
+
+            var pagingResult = new PagingReturn
             {
-                Id = p.Id,
-                Thumbnail = p.Thumbnail,
-                Title = p.Title,
-                Content = p.Content,
-                Status = p.Status,
-                CreatedAt = p.CreatedAt,
-                ArticleCateId = p.CategoryId,
-                ArticleCateName = p.Category.Name
-            }).ToList();
+                TotalPageCount = totalPageCount,
+                CurrentPage = pageNumber,
+                NextPage = nextPage,
+                PreviousPage = previousPage
+            };
+
+            var articlesWithPaging = await articles
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new ArticleReturnDTO
+                {
+                    Id = p.Id,
+                    Thumbnail = p.Thumbnail,
+                    Title = p.Title,
+                    Content = p.Content,
+                    Status = p.Status,
+                    CreatedAt = p.CreatedAt,
+                    ArticleCateId = p.CategoryId,
+                    ArticleCateName = p.Category.Name,
+                })
+                .ToListAsync();
+
+            return (articlesWithPaging, pagingResult);
+
         }
+
+
+
+        //public async Task<List<ArticleReturnDTO>> GetByCategoryIdAsync(int categoryId)
+        //{
+        //    var articles = await _repo.GetByCategoryIdAsync(categoryId);
+
+        //    return articles.Select(p => new ArticleReturnDTO
+        //    {
+        //        Id = p.Id,
+        //        Thumbnail = p.Thumbnail,
+        //        Title = p.Title,
+        //        Content = p.Content,
+        //        Status = p.Status,
+        //        CreatedAt = p.CreatedAt,
+        //        ArticleCateId = p.CategoryId,
+        //        ArticleCateName = p.Category.Name
+        //    }).ToList();
+        //}
 
         public async Task<Article?> GetByIdAsync(int id)
         {
@@ -250,5 +291,7 @@ namespace VHSKCD.Services.Impl
                 CreatedAt = p.CreatedAt
             }).ToList();
         }
+
+        
     }
 }

@@ -16,6 +16,7 @@ namespace VHSKCD.Services
         Task<Article?> EditAsync(IFormFile file, int id, UpdateArticle dto);
         Task<List<ArticleReturnDTO>> GetRandomArticlesAsync(int count);
         Task<List<ArticleReturnDTO>> GetLatestArticlesAsync(int count);
-        Task<List<ArticleReturnDTO>> GetByCategoryIdAsync(int categoryId);
+        Task<(List<ArticleReturnDTO>, PagingReturn)> GetByCategoryIdAsync(
+        int categoryId, int pageNumber, int pageSize);
     }
 }

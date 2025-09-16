@@ -78,12 +78,22 @@ namespace VHSKCD.Repository.Impl
             .ToListAsync();
         }
 
-        public async Task<List<Article>> GetByCategoryIdAsync(int categoryId)
+        public async Task<IQueryable<Article>> GetByCategoryIdAsync(int categoryId)
         {
-            return await _context.Articles
-            .Include(p => p.Category)
-            .Where(p => p.CategoryId == categoryId)
-            .ToListAsync();
+            return await Task.FromResult(
+                _context.Articles
+                .Include(p => p.Category)
+                .Where(p => p.CategoryId == categoryId)
+                .AsQueryable()
+            );
         }
+
+        //public async Task<List<Article>> GetByCategoryIdAsync(int categoryId)
+        //{
+        //    return await _context.Articles
+        //    .Include(p => p.Category)
+        //    .Where(p => p.CategoryId == categoryId)
+        //    .ToListAsync();
+        //}
     }
 }

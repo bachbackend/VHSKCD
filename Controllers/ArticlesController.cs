@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 using System.Reflection;
 using VHSKCD.DTOs.Articles;
 using VHSKCD.Extension;
@@ -111,16 +112,13 @@ namespace VHSKCD.Controllers
         }
 
         [HttpGet("GetArticleByCategoryId/{categoryId}")]
-        public async Task<IActionResult> GetArticleByCategoryId(int categoryId)
+        public async Task<IActionResult> GetArticleByCategoryId(int categoryId, int pageNumber, int? pageSize = null)
         {
-            var articles = await _service.GetByCategoryIdAsync(categoryId);
+            int actualPageSize = pageSize ?? _paginationSettings.DefaultPageSize;
 
-            if (articles == null || !articles.Any())
-            {
-                return NotFound(new { Message = $"Không tìm thấy bài viết với danh mục Id = {categoryId}" });
-            }
+            var (articles, paging) = await _service.GetByCategoryIdAsync(categoryId, pageNumber, actualPageSize);
 
-            return Ok(articles);
+            return Ok(new { Articles = articles, Paging = paging });
         }
 
         /*[HttpDelete("{id}")]
