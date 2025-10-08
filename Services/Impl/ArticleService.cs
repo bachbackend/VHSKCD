@@ -307,11 +307,12 @@ namespace VHSKCD.Services.Impl
 
             using var stream = new MemoryStream();
 
-            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "article", article.Thumbnail);
+            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","images", "article", article.Thumbnail);
             byte[]? imageData = null;
             if (File.Exists(imagePath))
             {
                 imageData = await File.ReadAllBytesAsync(imagePath);
+                Console.WriteLine($"🖼️ Ảnh tồn tại: {imagePath}");
             }
 
             QuestPDF.Fluent.Document.Create(container =>
@@ -334,13 +335,14 @@ namespace VHSKCD.Services.Impl
 
                         if (imageData != null)
                         {
-                            col.Item().Element(e =>
+                            col.Item().AlignCenter().Element(container =>
                             {
-                                e.Height(200);      
-                                e.AlignCenter();
                                 using var imgStream = new MemoryStream(imageData);
-                                e.Image(imgStream)    
-                                 .FitWidth();
+
+                                container
+                                    .ScaleToFit()   
+                                    .Height(200)    
+                                    .Image(imgStream);
                             });
                         }
 
