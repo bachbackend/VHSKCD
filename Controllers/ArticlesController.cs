@@ -121,6 +121,20 @@ namespace VHSKCD.Controllers
             return Ok(new { Articles = articles, Paging = paging });
         }
 
+        [HttpGet("DownloadPdf/{id}")]
+        public async Task<IActionResult> DownloadPdf(int id)
+        {
+            try
+            {
+                var pdfBytes = await _service.GeneratePdfAsync(id);
+                return File(pdfBytes, "application/pdf", $"Article_{id}.pdf");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         /*[HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

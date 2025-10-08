@@ -1,9 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Reflection.Metadata;
 using VHSKCD.DTOs.Articles;
 using VHSKCD.DTOs.Paging;
 using VHSKCD.Models;
 using VHSKCD.Repository;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using VHSKCD.Repository.Impl;
 
 namespace VHSKCD.Services.Impl
@@ -293,6 +297,93 @@ namespace VHSKCD.Services.Impl
             }).ToList();
         }
 
-        
+        public async Task<byte[]> GeneratePdfAsync(int id)
+        {
+            var article = await _repo.GetByIdAsync(id);
+            if (article == null)
+                throw new Exception("Không tìm thấy bài viết.");
+
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            using var stream = new MemoryStream();
+
+            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "article", article.Thumbnail);
+            byte[]? imageData = null;
+            if (File.Exists(imagePath))
+            {
+                imageData = await File.ReadAllBytesAsync(imagePath);
+            }
+
+            QuestPDF.Fluent.Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Margin(40);
+                    page.Size(PageSizes.A4);
+                    page.PageColor(Colors.White);
+
+                    page.Header()
+                        .Text(article.Title)
+                        .SemiBold().FontSize(22)
+                        .AlignCenter()
+                        .FontColor(Colors.Blue.Medium);
+
+                    page.Content().PaddingVertical(20).Column(col =>
+                    {
+                        col.Spacing(10);
+
+                        if (imageData != null)
+                        {
+                            col.Item().Element(e =>
+                            {
+                                e.Height(200);      
+                                e.AlignCenter();
+                                using var imgStream = new MemoryStream(imageData);
+                                e.Image(imgStream)    
+                                 .FitWidth();
+                            });
+                        }
+
+                        col.Item().Text($"Loại bài viết: {article.Category?.Name ?? "Không có"}")
+                            .FontSize(12)
+                            .FontColor(Colors.Grey.Darken1);
+
+                        col.Item().Text($"Ngày tạo: {article.CreatedAt?.ToString("dd/MM/yyyy") ?? "Không rõ"}")
+                            .FontSize(12)
+                            .FontColor(Colors.Grey.Darken1);
+
+                        if (!string.IsNullOrEmpty(article.Description))
+                        {
+                            col.Item().Text("Mô tả:")
+                                .Bold().FontSize(14).FontColor(Colors.Black);
+                            col.Item().Text(article.Description)
+                                .FontSize(12)
+                                .FontColor(Colors.Black);
+                        }
+
+                        if (!string.IsNullOrEmpty(article.Content))
+                        {
+                            col.Item().Text("Nội dung:")
+                                .Bold().FontSize(14).FontColor(Colors.Black);
+                            col.Item().Text(article.Content)
+                                .FontSize(12)
+                                .FontColor(Colors.Black)
+                                .AlignLeft()
+                                .LineHeight(1.4f);
+                        }
+                    });
+
+                    page.Footer()
+                        .AlignCenter()
+                        .Text($"Tải từ hệ thống lúc {DateTime.Now:dd/MM/yyyy HH:mm}")
+                        .FontSize(10)
+                        .FontColor(Colors.Grey.Medium);
+                });
+            }).GeneratePdf(stream);
+
+            return stream.ToArray();
+        }
+
+
     }
 }

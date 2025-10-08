@@ -99,10 +99,10 @@ namespace VHSKCD.Services.Impl
         {
             var user = await _userRepo.GetByUsernameAsync(dto.UserName);
             if (user == null)
-                throw new Exception("Sai tên đăng nhập.");
+                throw new Exception("Thông tin đăng nhập không hợp lệ.");
 
             if (!dto.Password.Verify(user.Password))
-                throw new Exception("Sai mật khẩu.");
+                throw new Exception("Thông tin đăng nhập không hợp lệ.");
 
             user.LastLogin = DateTime.Now;
             await _userRepo.SaveChangesAsync();

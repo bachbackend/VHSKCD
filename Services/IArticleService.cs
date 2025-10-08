@@ -18,5 +18,6 @@ namespace VHSKCD.Services
         Task<List<ArticleReturnDTO>> GetLatestArticlesAsync(int count);
         Task<(List<ArticleReturnDTO>, PagingReturn)> GetByCategoryIdAsync(
         int categoryId, int pageNumber, int pageSize);
+        Task<byte[]> GeneratePdfAsync(int id);
     }
 }
