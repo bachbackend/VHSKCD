@@ -9,6 +9,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using VHSKCD.Repository.Impl;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace VHSKCD.Services.Impl
 {
@@ -296,7 +297,7 @@ namespace VHSKCD.Services.Impl
                 CreatedAt = p.CreatedAt
             }).ToList();
         }
-
+        
         public async Task<byte[]> GeneratePdfAsync(int id)
         {
             var article = await _repo.GetByIdAsync(id);
@@ -386,6 +387,21 @@ namespace VHSKCD.Services.Impl
             return stream.ToArray();
         }
 
-
+        public async Task<List<ArticleReturnDTO>> GetTopArticlesByCategoryId(int categoryId, int count)
+        {
+            var articles = await _repo.GetTopByCategoryIdAsync(categoryId, count);
+            var topArticle = articles.FirstOrDefault(a => a.CategoryId == categoryId);
+            return articles.Select(p => new ArticleReturnDTO
+            {
+                Id = p.Id,
+                ArticleCateId = p.CategoryId,
+                ArticleCateName = p.Category.Name,
+                Title = p.Title,
+                Content = p.Content,
+                Thumbnail = p.Thumbnail,
+                Status = p.Status,
+                CreatedAt = p.CreatedAt
+            }).ToList();
+        }
     }
 }

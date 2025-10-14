@@ -85,6 +85,16 @@ namespace VHSKCD.Repository.Impl
                 .Where(p => p.CategoryId == categoryId);
         }
 
+        public Task<List<Article>> GetTopByCategoryIdAsync(int categoryId, int count)
+        {
+            return _context.Articles
+                .Include(p => p.Category)
+                .Where(p => p.CategoryId == categoryId)
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(count)
+                .ToListAsync();
+        }
+
         //public async Task<List<Article>> GetByCategoryIdAsync(int categoryId)
         //{
         //    return await _context.Articles

@@ -49,7 +49,7 @@ namespace VHSKCD.Controllers
         }
 
         [HttpGet("GetAllArticleStatusZero")]
-        public async Task<IActionResult> GetAllArticleStatusZero(
+        public async Task<IActionResult> GetAllArticleStatusZero(   
         int pageNumber = 1,
         int? pageSize = null,
         string? title = null,
@@ -119,6 +119,18 @@ namespace VHSKCD.Controllers
             var (articles, paging) = await _service.GetByCategoryIdAsync(categoryId, pageNumber, actualPageSize);
 
             return Ok(new { Articles = articles, Paging = paging });
+        }
+
+        [HttpGet("Get5ArticlesByCategoryId/{categoryId}")]
+        public async Task<IActionResult> Get5ArticlesByCategoryId(int categoryId)
+        {
+            
+            var articles = await _service.GetTopArticlesByCategoryId(categoryId, 5);
+            if (articles == null | !articles.Any())
+            {
+                return NotFound(new { Message = "Không tìm thấy bài viết nào trong danh mục này." });
+            }
+            return Ok(articles);
         }
 
         [HttpGet("DownloadPdf/{id}")]
